@@ -20,5 +20,5 @@ from django.urls import include  # Import include if you plan to include other U
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('accounts/', include('accounts.urls')),  # Example of including another URLconf, Auth URLs
+    path('accounts/', include('accounts.urls')),  # Example of including another URLconf Auth URLs
 ]
