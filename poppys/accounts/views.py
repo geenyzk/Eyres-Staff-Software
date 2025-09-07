@@ -6,6 +6,8 @@ from .forms import CustomUserCreationForm
 
 # Create your views here.
 
+
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -13,7 +15,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect('dashboard') # Replace with dashboard URL 
+            return redirect('landing') # Replace with dashboard URL 
         else:
             messages.error(request, 'Invalid username or password')
     return render(request, 'accounts/login.html')

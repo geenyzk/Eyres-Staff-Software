@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome | Eyres Software{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to Eyres Software</h1>
+        <p class="text-lg text-gray-600 mb-6">You're successfully logged in.</p>
+
+        <a href="{% url 'logout' %}"
+           class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-500 transition">
+            Log out
+        </a>
+    </div>
+</div>
+{% endblock %}
