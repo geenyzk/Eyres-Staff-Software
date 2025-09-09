@@ -138,5 +138,9 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / "static",  # ✅ Correct — this points to Eyres-Staff-Software/static
 ]
 
+# Auth redirects
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'landing'
+LOGOUT_REDIRECT_URL = 'login'
 
 

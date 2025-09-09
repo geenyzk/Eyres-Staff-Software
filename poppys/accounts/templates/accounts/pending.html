@@ -4,29 +4,33 @@
 {% block title %}Account Pending Approval{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-white px-4 py-12">
-    <div class="max-w-md w-full flex flex-col items-center text-center">
+<div class="w-full min-h-screen flex items-center justify-center bg-gray-100 px-6 py-10">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-5xl flex flex-col md:flex-row">
+        
+        <!-- Left side illustration -->
+        <div class="md:w-1/2 w-full">
+            <img src="{% static 'images/oops-illustration.png' %}" alt="Oops illustration"
+                 class="w-full h-full object-contain md:object-cover">
+        </div>
 
-        <!-- Illustration -->
-        <img src="{% static 'images/oops-illustration.png' %}" alt="Oops Illustration" class="w-80 mb-8">
+        <!-- Right side content -->
+        <div class="p-10 md:w-1/2 w-full flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Account Pending Approval</h2>
+            <p class="text-gray-500 mb-6">
+                Your account has been created but isn’t active yet. An administrator must approve it before you can sign in.
+            </p>
 
-        <!-- Text -->
-        <h1 class="text-2xl font-semibold text-gray-900 mb-2">Hold On!</h1>
-        <p class="text-gray-500 mb-6">
-            You need to have an account assigned to you by an administrator.
-        </p>
-
-        <!-- Button -->
-        <a href="mailto:admin@example.com"
-           class="bg-green-900 text-white px-6 py-3 rounded-md hover:bg-green-800 transition">
-            Contact Admin
-        </a>
+            <div class="flex flex-col gap-4">
+                <a href="{% url 'login' %}"
+                   class="w-full border border-gray-400 text-gray-800 py-3 rounded-lg text-center hover:bg-gray-100">
+                    Back to Login
+                </a>
+                <a href="mailto:admin@example.com"
+                   class="w-full bg-green-800 text-white py-3 rounded-lg text-center hover:bg-green-700">
+                    Contact Admin
+                </a>
+            </div>
+        </div>
     </div>
-    <form method="POST" action="{% url 'contact_admin' %}">
-        {% csrf_token %}
-        <button type="submit" class="bg-green-800 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition">
-            Contact Admin
-        </button>
-    </form>
 </div>
 {% endblock %}

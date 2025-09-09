@@ -5,3 +5,4 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def landing_view(request):
     return render(request, 'core/landing.html')
+

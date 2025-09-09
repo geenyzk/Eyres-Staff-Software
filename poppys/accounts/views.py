@@ -4,8 +4,6 @@ from .forms import PendingAwareAuthenticationForm
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .forms import CustomUserCreationForm
-from django.core.mail import send_mail
-from django.conf import settings
 
 # Create your views here.
 
@@ -61,19 +59,4 @@ def logout_view(request):
 
 def pending(request):
     return render(request, 'accounts/pending.html')
-
-def contact_admin(request):
-    if request.method == 'POST' and request.user.is_authenticated:
-        user = request.user
-        send_mail(
-            subject='Activation Request: Pending User',
-            message=f'User "{user.username}" with email "{user.email}" is requesting account activation.',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[admin_email for admin_email in settings.ADMINS_LIST],
-            fail_silently=False,
-        )
-        messages.success(request, "Your request has been sent to the admin.")
-        return redirect('pending')
-    else:
-        messages.error(request, "You must be logged in to contact the admin.")
-        return redirect('login')
+ 
