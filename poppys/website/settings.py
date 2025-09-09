@@ -14,6 +14,13 @@ import os
 # --- Load environment variables from .env file ---
 from dotenv import load_dotenv
 load_dotenv()
+# Ensure Python and requests use a valid CA bundle (fixes SSL verify errors)
+try:
+    import certifi  # type: ignore
+    os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+    os.environ.setdefault('REQUESTS_CA_BUNDLE', certifi.where())
+except Exception:
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -155,6 +162,8 @@ def _bool(env_value, default=True):
     return str(env_value).lower() in ('1', 'true', 'yes', 'on')
 
 sg_key = os.getenv("SENDGRID_API_KEY")
+# Expose key to settings for django-sendgrid-v5 backend
+SENDGRID_API_KEY = sg_key
 
 if EMAIL_BACKEND == 'sendgrid_backend.SendgridBackend':
     try:
@@ -184,12 +193,10 @@ else:
     elif not EMAIL_BACKEND:
         EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', os.environ.get('EMAIL_HOST_USER', 'no-reply@example.com'))
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', os.environ.get('EMAIL_HOST_USER', 'geeniazuka@gmail.com'))
 ADMIN_EMAILS = [e.strip() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
 
 # Auth redirects
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'landing'
 LOGOUT_REDIRECT_URL = 'login'
-
-print("SENDGRID_API_KEY:", os.getenv("SENDGRID_API_KEY"))
