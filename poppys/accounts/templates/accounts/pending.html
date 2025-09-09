@@ -25,10 +25,13 @@
                    class="w-full border border-gray-400 text-gray-800 py-3 rounded-lg text-center hover:bg-gray-100">
                     Back to Login
                 </a>
-                <a href="mailto:admin@example.com"
-                   class="w-full bg-green-800 text-white py-3 rounded-lg text-center hover:bg-green-700">
-                    Contact Admin
-                </a>
+                <form method="POST" action="{% url 'contact_admin' %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="w-full bg-green-800 text-white py-3 rounded-lg text-center hover:bg-green-700">
+                        Request Activation
+                    </button>
+                </form>
             </div>
         </div>
     </div>

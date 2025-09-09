@@ -10,6 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
+import os
+# --- Load environment variables from .env file ---
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,18 +28,14 @@ SECRET_KEY = 'django-insecure-vv2v$dpxatn6bfip300x!#*9$-_ln!d@0o(&cl@+)myzlk%@46
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Allow local hosts for development and test client
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver']
 
 
 # Application definition
-ADMIN_LIST = ['geeniazuka@gmail.com']  # ✅ Add your admin username here
-
-
 AUTH_USER_MODEL = 'accounts.CustomUser'  # ✅ Add this line to specify the custom user model
+ 
 
-DEFAULT_FROM_EMAIL = 'noreply@eyresapp.com'  # ✅ Set a default from email address
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # ✅ For development, prints emails to console
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'accounts',
+    'sendgrid_backend',
 
 ]
 
@@ -138,9 +139,57 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / "static",  # ✅ Correct — this points to Eyres-Staff-Software/static
 ]
 
+
+# --- Email configuration ---
+# Smart defaults:
+# - If EMAIL_BACKEND env is provided, use it. If it's SendGrid API backend
+#   but the package/key is missing, fall back to SMTP with SENDGRID_API_KEY.
+# - If no backend is provided but SENDGRID_API_KEY exists, use SMTP with SendGrid.
+# - Otherwise, use console backend (prints to terminal).
+
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+
+def _bool(env_value, default=True):
+    if env_value is None:
+        return default
+    return str(env_value).lower() in ('1', 'true', 'yes', 'on')
+
+sg_key = os.getenv("SENDGRID_API_KEY")
+
+if EMAIL_BACKEND == 'sendgrid_backend.SendgridBackend':
+    try:
+        import sendgrid_backend  # type: ignore  # noqa: F401
+        if not sg_key:
+            raise ImportError('SENDGRID_API_KEY missing')
+        # SendGrid backend will read SENDGRID_API_KEY from env
+    except Exception:
+        # Fallback to SMTP with SendGrid if key present; else console
+        if sg_key:
+            EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+            EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
+            EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+            EMAIL_USE_TLS = _bool(os.environ.get('EMAIL_USE_TLS', 'True'), True)
+            EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
+            EMAIL_HOST_PASSWORD = sg_key
+        else:
+            EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    if not EMAIL_BACKEND and sg_key:
+        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+        EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
+        EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+        EMAIL_USE_TLS = _bool(os.environ.get('EMAIL_USE_TLS', 'True'), True)
+        EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
+        EMAIL_HOST_PASSWORD = sg_key
+    elif not EMAIL_BACKEND:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', os.environ.get('EMAIL_HOST_USER', 'no-reply@example.com'))
+ADMIN_EMAILS = [e.strip() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
+
 # Auth redirects
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'landing'
 LOGOUT_REDIRECT_URL = 'login'
 
-
+print("SENDGRID_API_KEY:", os.getenv("SENDGRID_API_KEY"))
