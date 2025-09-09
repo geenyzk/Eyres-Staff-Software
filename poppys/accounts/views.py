@@ -1,24 +1,44 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
+from .forms import PendingAwareAuthenticationForm
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from .forms import CustomUserCreationForm
+from django.core.mail import send_mail
+from django.conf import settings
 
 # Create your views here.
 
-
-
 def login_view(request):
+    form = PendingAwareAuthenticationForm(request, data=request.POST or None)
+
     if request.method == 'POST':
+        # Explicitly catch inactive-but-correct-credentials before form validation
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user:
+        if username and password:
+            User = get_user_model()
+            try:
+                candidate = User.objects.get(username=username)
+            except User.DoesNotExist:
+                candidate = None
+            if candidate and not candidate.is_active and candidate.check_password(password):
+                messages.warning(request, 'Your account is not active yet. Please contact the administrator.')
+                return redirect('pending')
+
+        if form.is_valid():
+            user = form.get_user()
+
+            if not user.is_active:
+                messages.warning(request, 'Your account is not active yet. Please contact the administrator.')
+                return redirect('pending')
+
             login(request, user)
-            return redirect('landing') # Replace with dashboard URL 
+            return redirect('landing')
         else:
-            messages.error(request, 'Invalid username or password')
-    return render(request, 'accounts/login.html')
+            messages.error(request, 'Invalid credentials.')
+
+    return render(request, 'accounts/login.html', {'form': form})
 
 
 
@@ -39,3 +59,21 @@ def logout_view(request):
     logout(request)
     return redirect('login') # Replace with login URL
 
+def pending(request):
+    return render(request, 'accounts/pending.html')
+
+def contact_admin(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        user = request.user
+        send_mail(
+            subject='Activation Request: Pending User',
+            message=f'User "{user.username}" with email "{user.email}" is requesting account activation.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[admin_email for admin_email in settings.ADMINS_LIST],
+            fail_silently=False,
+        )
+        messages.success(request, "Your request has been sent to the admin.")
+        return redirect('pending')
+    else:
+        messages.error(request, "You must be logged in to contact the admin.")
+        return redirect('login')

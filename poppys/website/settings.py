@@ -28,8 +28,14 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+ADMIN_LIST = ['geeniazuka@gmail.com']  # ✅ Add your admin username here
+
 
 AUTH_USER_MODEL = 'accounts.CustomUser'  # ✅ Add this line to specify the custom user model
+
+DEFAULT_FROM_EMAIL = 'noreply@eyresapp.com'  # ✅ Set a default from email address
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # ✅ For development, prints emails to console
 
 INSTALLED_APPS = [
     'django.contrib.admin',
