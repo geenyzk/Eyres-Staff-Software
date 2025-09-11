@@ -195,6 +195,10 @@ else:
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', os.environ.get('EMAIL_HOST_USER', 'geeniazuka@gmail.com'))
 ADMIN_EMAILS = [e.strip() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
+# django-sendgrid-v5 uses this exact setting name to control sandbox mode
+# When True (and DEBUG is True), emails are not actually delivered.
+# Honor the env var and default to False so development can send real emails.
+SENDGRID_SANDBOX_MODE_IN_DEBUG = _bool(os.environ.get('SENDGRID_SANDBOX_MODE_IN_DEBUG'), False)
 
 # Auth redirects
 LOGIN_URL = 'login'
