@@ -1,0 +1,21 @@
+# Environment and secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+
+# SQLite DBs
+*.sqlite3
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store
